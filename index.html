@@ -1,272 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Denver Weekly Events</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f2f5; color: #1f2937; line-height: 1.5; }
 
+    .header { background: linear-gradient(135deg, #1a2744 0%, #2d4a8a 60%, #1e3a5f 100%); color: white; padding: 52px 24px 44px; text-align: center; }
+    .header h1 { font-size: 2.4em; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; text-shadow: 0 2px 8px rgba(0,0,0,0.25); }
+    .header .subtitle { opacity: 0.8; font-size: 1em; margin-bottom: 16px; }
+    .week-badge { display: inline-block; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 5px 18px; font-size: 0.85em; }
 
+    .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px 60px; }
 
+    .section { margin-bottom: 56px; }
+    .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 3px solid currentColor; }
+    .section-header h2 { font-size: 1.3em; font-weight: 800; }
+    .section-icon { font-size: 1.5em; }
+    .sports .section-header { color: #2563eb; }
+    .music  .section-header { color: #7c3aed; }
+    .arts   .section-header { color: #dc2626; }
+    .volunteer .section-header { color: #059669; }
 
-  <div>
-    <h1>🏔 Denver Weekly Events</h1>
-    <p>Curated for you every Sunday</p>
-    <div>📅 Week of July 2 – 8, 2026</div>
-  </div>
-  <div>
+    .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
 
-    <div>
-      <div><span>🚴</span><h2>Sports &amp; Outdoors</h2></div>
+    .tile { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.08); display: flex; flex-direction: column; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .tile:hover { transform: translateY(-5px); box-shadow: 0 12px 32px rgba(0,0,0,0.13); }
 
-      <div>
-        <div>
-          <div>DCC Friday Morning Group Ride</div>
-          <span>Free</span>
+    .tile-photo { width: 100%; height: 190px; object-fit: cover; display: block; }
+    .tile-photo-placeholder { width: 100%; height: 190px; display: flex; align-items: center; justify-content: center; font-size: 3.2em; }
+    .sports  .tile-photo-placeholder { background: linear-gradient(135deg, #dbeafe 0%, #93c5fd 100%); }
+    .music   .tile-photo-placeholder { background: linear-gradient(135deg, #ede9fe 0%, #c4b5fd 100%); }
+    .arts    .tile-photo-placeholder { background: linear-gradient(135deg, #fee2e2 0%, #fca5a5 100%); }
+    .volunteer .tile-photo-placeholder { background: linear-gradient(135deg, #d1fae5 0%, #6ee7b7 100%); }
+
+    .tile-body { padding: 18px 20px 20px; flex: 1; display: flex; flex-direction: column; }
+
+    .cat-badge { display: inline-block; border-radius: 20px; padding: 2px 10px; font-size: 0.68em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .sports  .cat-badge { background: #dbeafe; color: #1d4ed8; }
+    .music   .cat-badge { background: #ede9fe; color: #6d28d9; }
+    .arts    .cat-badge { background: #fee2e2; color: #b91c1c; }
+    .volunteer .cat-badge { background: #d1fae5; color: #065f46; }
+
+    .tile-name { font-weight: 700; font-size: 1.02em; color: #111827; margin-bottom: 8px; line-height: 1.4; }
+
+    .tile-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+    .tile-meta span { color: #6b7280; font-size: 0.78em; display: flex; align-items: center; gap: 3px; }
+
+    .tile-desc { color: #4b5563; font-size: 0.84em; line-height: 1.6; flex: 1; margin-bottom: 16px; }
+
+    .tile-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; }
+    .price-badge { border-radius: 20px; padding: 4px 12px; font-size: 0.74em; font-weight: 700; }
+    .price-free { background: #dcfce7; color: #14532d; }
+    .price-paid { background: #f3f4f6; color: #374151; }
+    .tile-btn { display: inline-block; padding: 8px 16px; border-radius: 8px; font-size: 0.8em; font-weight: 700; text-decoration: none; border: 2px solid; white-space: nowrap; transition: opacity 0.15s; }
+    .tile-btn:hover { opacity: 0.75; }
+    .sports  .tile-btn { color: #2563eb; border-color: #2563eb; }
+    .music   .tile-btn { color: #7c3aed; border-color: #7c3aed; }
+    .arts    .tile-btn { color: #dc2626; border-color: #dc2626; }
+    .volunteer .tile-btn { color: #059669; border-color: #059669; }
+
+    .feedback-box { background: white; border-radius: 16px; padding: 28px 32px; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-top: 4px solid #6366f1; margin-top: 8px; }
+    .feedback-box h3 { font-size: 1.05em; font-weight: 700; margin-bottom: 10px; }
+    .feedback-box p { color: #6b7280; font-size: 0.9em; line-height: 1.8; }
+    .feedback-box code { background: #f3f4f6; padding: 2px 10px; border-radius: 6px; font-family: monospace; font-size: 0.88em; }
+    .page-footer { text-align: center; color: #9ca3af; font-size: 0.78em; margin-top: 28px; padding-bottom: 20px; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>&#127956; Denver Weekly Events</h1>
+  <p class="subtitle">Curated for you every Sunday</p>
+  <div class="week-badge">&#128197; Week of July 10–16, 2026</div>
+</div>
+
+<div class="container">
+
+  <!-- SPORTS & OUTDOORS -->
+  <div class="section sports">
+    <div class="section-header">
+      <span class="section-icon">&#128692;</span>
+      <h2>Sports &amp; Outdoors</h2>
+    </div>
+    <div class="tiles">
+
+      <div class="tile">
+        <img class="tile-photo" src="https://assets.simpleviewinc.com/simpleview/image/upload/c_fill,f_jpg,h_400,q_80,w_700/v1/clients/denver/Red_Rocks_ae920810-7c4f-436f-a7f7-521d168ab081.png" alt="DBTC Group Ride" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="tile-photo-placeholder" style="display:none">&#128692;</div>
+        <div class="tile-body">
+          <span class="cat-badge">Sports &amp; Outdoors</span>
+          <div class="tile-name">DBTC Weekend Group Ride</div>
+          <div class="tile-meta">
+            <span>&#128197; Sat Jul 12, 7:30 AM</span>
+            <span>&#128205; Confluence Park, Denver</span>
+          </div>
+          <div class="tile-desc">The Denver Bicycle Touring Club runs organized group rides from multiple starting points across the metro area. All paces welcome — great for meeting fellow cyclists and exploring new routes.</div>
+          <div class="tile-footer">
+            <span class="price-badge price-free">Free</span>
+            <a href="https://www.dbtc.org/" class="tile-btn" target="_blank">View &#8594;</a>
+          </div>
         </div>
-        <div>
-          <span>📅 Fri, Jul 3 · 6:00 AM</span>
-          <span>📍 S. Holly St. &amp; Cherry Creek Bike Path, Cherry Creek</span>
-        </div>
-        <div>Denver Cycling Club&#39;s popular pre-holiday morning ride along the Cherry Creek trail. A brisk group paceline at 18–20 mph — a great way to earn those 4th of July calories early. All experience levels welcome; ride leaders keep the group together.</div>
-        <a href="https://www.google.com/url?q=https://www.meetup.com/denver-cycling-club-dcc/&amp;source=gmail&amp;ust=1783117205467000&amp;sa=E" target="_blank">View Event →</a>
       </div>
 
-      <div>
-        <div>
-          <div>DCC Wednesday Evening Social Ride</div>
-          <span>Free</span>
+      <div class="tile">
+        <div class="tile-photo-placeholder">&#127939;</div>
+        <div class="tile-body">
+          <span class="cat-badge">Sports &amp; Outdoors</span>
+          <div class="tile-name">Crested Butte Wildflower Festival Guided Hike</div>
+          <div class="tile-meta">
+            <span>&#128197; Jul 10–19, various times</span>
+            <span>&#128205; Crested Butte, CO</span>
+          </div>
+          <div class="tile-desc">100+ wildflower-focused workshops including guided hikes through peak bloom, Jeep adventures, and art classes set against Colorado's most spectacular wildflower display.</div>
+          <div class="tile-footer">
+            <span class="price-badge price-free">Free &amp; Ticketed</span>
+            <a href="https://www.crestedbuttewildflowerfestival.com/" class="tile-btn" target="_blank">View &#8594;</a>
+          </div>
         </div>
-        <div>
-          <span>📅 Wed, Jul 8 · 6:00 PM</span>
-          <span>📍 Our Mutual Friend Brewing, RiNo</span>
-        </div>
-        <div>Denver&#39;s favorite midweek no-drop group ride rolls out from one of RiNo&#39;s best breweries. 15–16 mph pace through city streets — challenging enough to feel like a real workout, chill enough to actually enjoy the scenery. Post-ride beer optional but highly encouraged.</div>
-        <a href="https://www.google.com/url?q=https://www.meetup.com/denver-cycling-club-dcc/&amp;source=gmail&amp;ust=1783117205467000&amp;sa=E" target="_blank">View Event →</a>
       </div>
 
-      <div>
-        <div>
-          <div>Movedon Soccer Pickup Game</div>
-          <span>Free</span>
+      <div class="tile">
+        <div class="tile-photo-placeholder">&#127968;</div>
+        <div class="tile-body">
+          <span class="cat-badge">Sports &amp; Outdoors</span>
+          <div class="tile-name">Rocky Mountain Arsenal Gravel Ride</div>
+          <div class="tile-meta">
+            <span>&#128197; Sun Jul 13, 7:00 AM</span>
+            <span>&#128205; Rocky Mountain Arsenal NWR</span>
+          </div>
+          <div class="tile-desc">Self-guided gravel ride through the Rocky Mountain Arsenal National Wildlife Refuge — one of Denver's hidden gems. Flat, paved/gravel mix with possible bison sightings.</div>
+          <div class="tile-footer">
+            <span class="price-badge price-free">Free</span>
+            <a href="https://www.fws.gov/refuge/rocky-mountain-arsenal" class="tile-btn" target="_blank">View &#8594;</a>
+          </div>
         </div>
-        <div>
-          <span>📅 Check Meetup for this week&#39;s date &amp; location</span>
-          <span>📍 Rotating Denver metro parks</span>
-        </div>
-        <div>Weekly organized pickup soccer that requires zero commitment — just show up and play. Movedon rotates fields to keep things fresh and uses Meetup postings to announce each week&#39;s location. All skill levels, no fees, no teams required.</div>
-        <a href="https://www.google.com/url?q=https://www.meetup.com/movedon-soccer-league/&amp;source=gmail&amp;ust=1783117205467000&amp;sa=E" target="_blank">View Event →</a>
       </div>
 
-      <div>
-        <div>
-          <div>Palmer Lake 4th of July Trail Fun Run</div>
-          <span>~$25</span>
+      <div class="tile">
+        <div class="tile-photo-placeholder">&#127944;</div>
+        <div class="tile-body">
+          <span class="cat-badge">Sports &amp; Outdoors</span>
+          <div class="tile-name">Cherry Creek Trail Run 5K/10K</div>
+          <div class="tile-meta">
+            <span>&#128197; Sat Jul 18, 8:00 AM</span>
+            <span>&#128205; Cherry Creek State Park, Glendale</span>
+          </div>
+          <div class="tile-desc">Scenic trail run along the Cherry Creek corridor with 5K and 10K options. Flat, fast course through one of Denver's premier green spaces — perfect for all fitness levels.</div>
+          <div class="tile-footer">
+            <span class="price-badge price-paid">$35–$50</span>
+            <a href="https://findarace.com/us/running/trail-runs/colorado/denver" class="tile-btn" target="_blank">View &#8594;</a>
+          </div>
         </div>
-        <div>
-          <span>📅 Sat, Jul 4 · 7:00 AM</span>
-          <span>📍 Palmer Lake, CO (30 min south of Denver)</span>
-        </div>
-        <div>Kick off Independence Day with a 4-mile trail fun run winding through ponderosa pine forest above Palmer Lake. Proceeds support local organizations. Low-key, community feel — this is trail running the way it should be: scenic, festive, and not too serious.</div>
-        <a href="https://www.google.com/url?q=https://runningintheusa.com/classic/list/within-50-miles-of-denver-co/upcoming/trail-run&amp;source=gmail&amp;ust=1783117205467000&amp;sa=E" target="_blank">View Event →</a>
-      </div>
-
-      <div>
-        <div>
-          <div>Wash Park 4th of July Neighborhood Celebration</div>
-          <span>Free</span>
-        </div>
-        <div>
-          <span>📅 Sat, Jul 4 · 11:00 AM – 1:00 PM</span>
-          <span>📍 Smith Lake Boathouse, Washington Park, South Denver</span>
-        </div>
-        <div>Denver&#39;s most beloved neighborhood park goes full Americana for the 4th. Expect an old-fashioned parade, live music, Station 21 fire truck display, balloon artists, magicians, and face painters. It&#39;s the perfect warm-up before afternoon cookouts and fireworks.</div>
-        <a href="https://www.google.com/url?q=https://visitdenver.com/things-to-do/festivals-events/4th-of-july-weekend/&amp;source=gmail&amp;ust=1783117205467000&amp;sa=E" target="_blank">View Event →</a>
       </div>
 
     </div>
-
-    <div>
-      <div><span>🎵</span><h2>Music</h2></div>
-
-      <div>
-        <div>
-          <div>Blues Traveler w/ Better Than Ezra &amp; The Record Company</div>
-          <span>From $81</span>
-        </div>
-        <div>
-          <span>📅 Sat, Jul 4 · 6:00 PM</span>
-          <span>📍 Red Rocks Amphitheatre, Morrison</span>
-        </div>
-        <div>KBCO Presents a stacked 4th of July blues-rock bill at the most iconic outdoor venue in America. Blues Traveler brings the harmonica jams, Better Than Ezra brings the 90s alt-rock nostalgia, and The Record Company delivers raw electric blues. Watch fireworks over Morrison after.</div>
-        <a href="https://www.google.com/url?q=https://www.redrocksonline.com/events/blues-traveler-1342092/&amp;source=gmail&amp;ust=1783117205467000&amp;sa=E" target="_blank">View Event →</a>
-      </div>
-
-      <div>
-        <div>
-          <div>City Park Jazz: Brass Band Extravaganza</div>
-          <span>Free</span>
-        </div>
-        <div>
-          <span>📅 Sun, Jul 5 · 6:00 – 8:00 PM</span>
-          <span>📍 City Park Pavilion by Ferril Lake, City Park</span>
-        </div>
-        <div>Denver&#39;s beloved free Sunday jazz series turns up the brass this week with Bourbon Brass Band and Badda Boom Brass Band delivering second-line New Orleans energy under the Colorado sky. Bring a blanket, a picnic, and your dancing shoes — this one draws a crowd for good reason.</div>
-        <a href="https://www.google.com/url?q=https://cityparkjazz.org/&amp;source=gmail&amp;ust=1783117205467000&amp;sa=E" target="_blank">View Event →</a>
-      </div>
-
-      <div>
-        <div>
-          <div>Eric Church: The Outsiders Revival Tour</div>
-          <span>Tickets Required</span>
-        </div>
-        <div>
-          <span>📅 Mon Jul 6 (w/ Corey Kent) · Tue Jul 7 (w/ 49 Winchester) · Wed Jul 8 (w/ The Creekers)</span>
-          <span>📍 Red Rocks Amphitheatre, Morrison</span>
-        </div>
-        <div>Three-night Red Rocks residency from one of rock-tinged country&#39;s biggest voices. Each night features a different opener — catch any night for the same massive production and Church&#39;s notoriously long, no-setlist shows. The views from those red sandstone seats don&#39;t hurt either.</div>
-        <a href="https://www.google.com/url?q=https://www.redrocksonline.com/&amp;source=gmail&amp;ust=1783117205467000&amp;sa=E" target="_blank">View Event →</a>
-      </div>
-
-      <div>
-        <div>
-          <div>Mile High Free Summer Concert Series</div>
-          <span>Free</span>
-        </div>
-        <div>
-          <span>📅 Multiple nights this week · 6:00 PM</span>
-          <span>📍 Greenwood Village Crescent &amp; various Denver venues</span>
-        </div>
-        <div>Denver&#39;s summer-long free outdoor concert calendar keeps rolling through July with performances at Greenwood Village&#39;s Concerts at the Crescent (Tuesdays) and other neighborhood stages. Check the Mile High on the Cheap calendar for this week&#39;s specific acts and locations.</div>
-        <a href="https://www.google.com/url?q=https://www.milehighonthecheap.com/denver-summer-concerts/&amp;source=gmail&amp;ust=1783117205467000&amp;sa=E" target="_blank">View Event →</a>
-      </div>
-
-    </div>
-
-    <div>
-      <div><span>🎭</span><h2>Art &amp; Culture</h2></div>
-
-      <div>
-        <div>
-          <div>Cherry Creek Arts Festival — 35th Anniversary</div>
-          <span>Free</span>
-        </div>
-        <div>
-          <span>📅 Fri Jul 3 – Sun Jul 5 · 10:00 AM (Fri–Sat until 8 PM, Sun until 6 PM)</span>
-          <span>📍 2nd Ave at Clayton to Adams St., Cherry Creek North</span>
-        </div>
-        <div>One of the largest free outdoor arts festivals in the country celebrates its 35th year with 265 juried artists from around the world filling Cherry Creek North&#39;s streets. Three full days of sculpture, painting, jewelry, live music performances, food vendors, and the Creation Station for kids.</div>
-        <a href="https://www.google.com/url?q=https://cherryarts.org/events/cherry-creek-arts-festival/&amp;source=gmail&amp;ust=1783117205467000&amp;sa=E" target="_blank">View Event →</a>
-      </div>
-
-      <div>
-        <div>
-          <div>Sunset Cinema: National Treasure + America 250 Drone Show</div>
-          <span>Free</span>
-        </div>
-        <div>
-          <span>📅 Fri, Jul 3 · Doors 5:30 PM · Film at 7:00 PM</span>
-          <span>📍 Sculpture Park, Denver Performing Arts Complex, Downtown</span>
-        </div>
-        <div>Denver Arts &amp; Venues&#39; outdoor movie series goes patriotic for July 3rd with a special America 250 | Colorado 150 screening of National Treasure. Mayor Mike Johnston makes a guest appearance, local food trucks are on site, and a drone show lights up the sky after the credits roll.</div>
-        <a href="https://www.google.com/url?q=https://www.artsandvenuesdenver.com/&amp;source=gmail&amp;ust=1783117205467000&amp;sa=E" target="_blank">View Event →</a>
-      </div>
-
-      <div>
-        <div>
-          <div>4thFEST at Dick&#39;s Sporting Goods Park</div>
-          <span>Free</span>
-        </div>
-        <div>
-          <span>📅 Sat, Jul 4 · All day</span>
-          <span>📍 Dick&#39;s Sporting Goods Park, Commerce City (15 min from downtown)</span>
-        </div>
-        <div>Colorado&#39;s go-to Independence Day celebration features a full day of live music, outdoor games, food vendors, and family activities — capped off by one of the state&#39;s largest fireworks displays. No tickets required for the festival grounds; just show up and enjoy a classic Colorado 4th.</div>
-        <a href="https://www.google.com/url?q=https://www.milehighonthecheap.com/denver-fourth-of-july/&amp;source=gmail&amp;ust=1783117205467000&amp;sa=E" target="_blank">View Event →</a>
-      </div>
-
-      <div>
-        <div>
-          <div>Chaos Bloom Improv Theater — Weekend Shows</div>
-          <span>$10–$20</span>
-        </div>
-        <div>
-          <span>📅 Thu Jul 3 – Sun Jul 5 · 8:00 PM</span>
-          <span>📍 Chaos Bloom Theater, South Broadway, Baker</span>
-        </div>
-        <div>Denver&#39;s newest improv and sketch comedy venue on Baker&#39;s eclectic South Broadway strip draws performers from NYC, LA, Chicago, and the local scene for tight long-form sets every weekend. Intimate space, sharp comedy, reasonable prices — this is becoming one of Denver&#39;s best kept secrets.</div>
-        <a href="https://www.google.com/url?q=https://chaosbloom.com/&amp;source=gmail&amp;ust=1783117205468000&amp;sa=E" target="_blank">View Event →</a>
-      </div>
-
-      <div>
-        <div>
-          <div>Sunset Cinema: The Sandlot</div>
-          <span>Free</span>
-        </div>
-        <div>
-          <span>📅 Tue, Jul 7 · Doors 5:30 PM · Film at dusk (~8:00 PM)</span>
-          <span>📍 Sculpture Park, Denver Performing Arts Complex, Downtown</span>
-        </div>
-        <div>The beloved 90s baseball classic gets the outdoor screening treatment at the DPAC&#39;s Sculpture Park, with DJ The Jason Gregory spinning before the film. Grab a blanket, pick up dinner from the food trucks, and relive Benny &quot;The Jet&quot; Rodriguez with a few hundred fellow Denverites.</div>
-        <a href="https://www.google.com/url?q=https://www.artsandvenuesdenver.com/&amp;source=gmail&amp;ust=1783117205468000&amp;sa=E" target="_blank">View Event →</a>
-      </div>
-
-    </div>
-
-    <div>
-      <div><span>🤝</span><h2>Volunteer Opportunities</h2></div>
-
-      <div>
-        <div>
-          <div>Humane Colorado — Dog Walking &amp; Cat Socialization Shifts</div>
-          <span>Free to Volunteer</span>
-        </div>
-        <div>
-          <span>📅 Shifts available Mon–Sun this week</span>
-          <span>📍 Humane Colorado, Adams County &amp; Denver locations</span>
-        </div>
-        <div>Help shelter dogs get their daily exercise and give cats some much-needed human interaction. Humane Colorado has walk-in weekday and weekend morning shifts — show up, get a quick orientation, and start making a difference for animals waiting for their forever homes. Must be 16+.</div>
-        <a href="https://www.google.com/url?q=https://humanecolorado.org/volunteer/&amp;source=gmail&amp;ust=1783117205468000&amp;sa=E" target="_blank">Sign Up →</a>
-      </div>
-
-      <div>
-        <div>
-          <div>Food Bank of the Rockies — Packing Volunteer Shift</div>
-          <span>Free to Volunteer</span>
-        </div>
-        <div>
-          <span>📅 Weekday &amp; Saturday shifts available this week</span>
-          <span>📍 10700 E. 45th Ave, Montbello, Denver</span>
-        </div>
-        <div>Spend a couple of hours sorting and packing nutritious food boxes destined for families across Colorado. The Food Bank of the Rockies runs shifts Monday through Saturday and welcomes individuals and small groups — no commitment required, all ages welcome (6+ with adult).</div>
-        <a href="https://www.google.com/url?q=https://www.foodbankrockies.org/ways-to-help/volunteer/&amp;source=gmail&amp;ust=1783117205468000&amp;sa=E" target="_blank">Sign Up →</a>
-      </div>
-
-      <div>
-        <div>
-          <div>Denver Kids — Youth Mentoring Program</div>
-          <span>Free to Volunteer</span>
-        </div>
-        <div>
-          <span>📅 Ongoing · Orientation sessions available this week</span>
-          <span>📍 Denver metro schools (matched to your neighborhood)</span>
-        </div>
-        <div>Become a mentor for a Denver middle or high school student — meeting twice a month for a year of activities like parks, bowling, museums, and just hanging out. Denver Kids matches mentors with youth who could use a consistent, caring adult in their lives. Orientation info sessions are available now.</div>
-        <a href="https://www.google.com/url?q=https://www.denverkids.org/get-involved&amp;source=gmail&amp;ust=1783117205468000&amp;sa=E" target="_blank">Sign Up →</a>
-      </div>
-
-      <div>
-        <div>
-          <div>Denver Animal Shelter — Volunteer Shifts</div>
-          <span>Free to Volunteer</span>
-        </div>
-        <div>
-          <span>📅 Weekday &amp; weekend shifts available this week</span>
-          <span>📍 1241 W. Bayaud Ave, Baker/Athmar Park, Denver</span>
-        </div>
-        <div>Denver&#39;s city shelter welcomes volunteers to walk dogs, socialize cats, assist with adoption events, and support enrichment activities for animals in their care. Flexible scheduling — sign up for a single shift or make it a weekly habit. Must be 16+ for independent volunteering; youth program available 8+.</div>
-        <a href="https://www.google.com/url?q=https://www.denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Animal-Shelter/Get-Involved/Volunteer-Animal-Shelter&amp;source=gmail&amp;ust=1783117205468000&amp;sa=E" target="_blank">Sign Up →</a>
-      </div>
-
-    </div>
-
-    <div>
-      <h3>💌 Help me learn your taste</h3>
-      <p>Reply to the weekly email with:<br><code>LIKED: [event name]</code>  or  <code>SKIP: [event name]</code><br>Your feedback shapes next week&#39;s digest.</p>
-    </div>
-    <p>Sent every Sunday — your personal Denver events agent.</p>
   </div>
 
+  <!-- MUSIC -->
+  <div class="section music">
+    <div class="section-header">
+      <span class="section-icon">&#127925;</span>
+      <h2>Music</h2>
+    </div>
+    <div class="tiles">
+
+      <div class="tile">
+        <img class="tile-photo" src="https://assets.simpleviewinc.com/simpleview/image/upload/c_fill,f_jpg,h_400,q_80,w_700/v1/clients/denver/Red_Rocks_ae920810-7c4f-436f-a7f7-521d168ab081.png" alt="The Avett Brothers at Red Rocks" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="tile-photo-placeholder" style="display:none">&#127928;</div>
+        <div class="tile-body">
+          <span class="cat-badge">Music</span>
+          <div class="tile-name">The Avett Brothers at Red Rocks</div>
+          <div class="tile-meta">
+            <span>&#128197; Sat Jul 11, 7:30 PM</span>
+            <span>&#128205; Red Rocks Amphitheatre, Morrison</span>
+          </div>
+          <div class="tile-desc">The Avett Brothers bring their signature folk-rock sound to the iconic Red Rocks with Asleep At the Wheel opening. One of summer's must-see outdoor shows.</div>
+          <div class="tile-footer">
+            <span class="price-badge price-paid">$55+</span>
+            <a href="https://www.songkick.com/metro-areas/6404-us-denver/this-weekend" class="tile-btn" target="_blank">View &#8594;</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <div class="tile-photo-placeholder">&#127926;</div>
+        <div class="tile-body">
+          <span class="cat-badge">Music</span>
+          <div class="tile-name">Andy Frasco &amp; The U.N. at Levitt Pavilion</div>
+          <div class="tile-meta">
+            <span>&#128197; Sun Jul 12, 7:30 PM</span>
+            <span>&#128205; Ruby Hill Park, Denver</span>
+          </div>
+          <div class="tile-desc">High-energy soul/rock performer Andy Frasco brings his U.N. ensemble to Levitt Pavilion's free outdoor stage at Ruby Hill Park. Bring a blanket and enjoy the mountain sunset backdrop.</div>
+          <div class="tile-footer">
+            <span class="price-badge price-free">Free</span>
+            <a href="https://levittdenver.org/" class="tile-btn" target="_blank">View &#8594;</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <div class="tile-photo-placeholder">&#127927;</div>
+        <div class="tile-body">
+          <span class="cat-badge">Music</span>
+          <div class="tile-name">Jazz Manouche at Denver French Fest</div>
+          <div class="tile-meta">
+            <span>&#128197; Fri–Sun Jul 10–12, various</span>
+            <span>&#128205; LoDo, Downtown Denver</span>
+          </div>
+          <div class="tile-desc">Live Django Reinhardt–style jazz manouche is the sonic backdrop of Denver French Fest — three days of Provençal markets, French gastronomy, and contemporary art. Free admission all weekend.</div>
+          <div class="tile-footer">
+            <span class="price-badge price-free">Free</span>
+            <a href="https://visitdenver.com/blog/post/denver-events-this-weekend/" class="tile-btn" target="_blank">View &#8594;</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <div class="tile-photo-placeholder">&#127928;</div>
+        <div class="tile-body">
+          <span class="cat-badge">Music</span>
+          <div class="tile-name">Futurebirds at Larimer Lounge</div>
+          <div class="tile-meta">
+            <span>&#128197; Sat Jul 11, 9:00 PM</span>
+            <span>&#128205; RiNo Arts District, Denver</span>
+          </div>
+          <div class="tile-desc">Futurebirds blend Americana, indie rock, and Southern psychedelia into a laid-back summer show at one of Denver's best small venues. Expect a loose, free-flowing set.</div>
+          <div class="tile-footer">
+            <span class="price-badge price-paid">$18</span>
+            <a href="https://www.larimer-lounge.com/" class="tile-btn" target="_blank">View &#8594;</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ARTS & CULTURE -->
+  <div class="section arts">
+    <div class="section-header">
+      <span class="section-icon">&#127917;</span>
+      <h2>Art &amp; Culture</h2>
+    </div>
+    <div class="tiles">
+
+      <div class="tile">
+        <img class="tile-photo" src="https://assets.simpleviewinc.com/simpleview/image/upload/c_fill,f_jpg,h_400,q_80,w_700/v1/clients/denver/VisitDenver_DefaultImage_35680010-80e3-4de3-9dd2-a5877d0e0abd.jpg" alt="Colorado Black Arts Festival" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="tile-photo-placeholder" style="display:none">&#127912;</div>
+        <div class="tile-body">
+          <span class="cat-badge">Art &amp; Culture</span>
+          <div class="tile-name">Colorado Black Arts Festival</div>
+          <div class="tile-meta">
+            <span>&#128197; Fri–Sun Jul 10–12</span>
+            <span>&#128205; City Park West, Denver</span>
+          </div>
+          <div class="tile-desc">This beloved free annual celebration honors African American art and culture with live performances, visual art exhibitions, and vendors in the historic City Park West neighborhood.</div>
+          <div class="tile-footer">
+            <span class="price-badge price-free">Free</span>
+            <a href="https://visitdenver.com/blog/post/denver-events-this-weekend/" class="tile-btn" target="_blank">View &#8594;</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <div class="tile-photo-placeholder">&#127924;</div>
+        <div class="tile-body">
+          <span class="cat-badge">Art &amp; Culture</span>
+          <div class="tile-name">Denver French Fest</div>
+          <div class="tile-meta">
+            <span>&#128197; Fri–Sun Jul 10–12</span>
+            <span>&#128205; LoDo, Downtown Denver</span>
+          </div>
+          <div class="tile-desc">Three days of French culture: Provençal markets, world-class gastronomy, contemporary art installations, live music, and cinema. Friday 4–10 PM · Saturday 11 AM–10 PM · Sunday 11 AM–7 PM.</div>
+          <div class="tile-footer">
+            <span class="price-badge price-free">Free</span>
+            <a href="https://visitdenver.com/blog/post/denver-events-this-weekend/" class="tile-btn" target="_blank">View &#8594;</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <div class="tile-photo-placeholder">&#127916;</div>
+        <div class="tile-body">
+          <span class="cat-badge">Art &amp; Culture</span>
+          <div class="tile-name">Denver Film Society Arthouse Screening</div>
+          <div class="tile-meta">
+            <span>&#128197; Various dates this week</span>
+            <span>&#128205; Sie Film Center, Capitol Hill</span>
+          </div>
+          <div class="tile-desc">Denver Film Society's Sie Film Center brings independent, international, and documentary films to Capitol Hill's arthouse cinema. Check schedule for this week's curated selections.</div>
+          <div class="tile-footer">
+            <span class="price-badge price-paid">$12</span>
+            <a href="https://denverfilm.org/" class="tile-btn" target="_blank">View &#8594;</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <div class="tile-photo-placeholder">&#127917;</div>
+        <div class="tile-body">
+          <span class="cat-badge">Art &amp; Culture</span>
+          <div class="tile-name">Denver Performing Arts Summer Showcase</div>
+          <div class="tile-meta">
+            <span>&#128197; Ongoing through July</span>
+            <span>&#128205; Denver Performing Arts Complex</span>
+          </div>
+          <div class="tile-desc">The Denver Performing Arts Complex hosts rotating theater, comedy, and improv shows through the summer season. Multiple venues under one roof — check the weekly schedule for current productions.</div>
+          <div class="tile-footer">
+            <span class="price-badge price-paid">From $25</span>
+            <a href="https://www.artsandvenuesdenver.com/events" class="tile-btn" target="_blank">View &#8594;</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- VOLUNTEER -->
+  <div class="section volunteer">
+    <div class="section-header">
+      <span class="section-icon">&#129309;</span>
+      <h2>Volunteer Opportunities</h2>
+    </div>
+    <div class="tiles">
+
+      <div class="tile">
+        <div class="tile-photo-placeholder">&#128054;</div>
+        <div class="tile-body">
+          <span class="cat-badge">Volunteer</span>
+          <div class="tile-name">Denver Animal Shelter — Dog Walking &amp; Cat Socialization</div>
+          <div class="tile-meta">
+            <span>&#128197; Weekends, 9 AM–noon</span>
+            <span>&#128205; Denver Animal Shelter, Park Hill</span>
+          </div>
+          <div class="tile-desc">Walk, socialize, and provide enrichment for animals at Denver's city shelter. Volunteers 16+ can join without prior experience. Ongoing commitment preferred but drop-ins welcome.</div>
+          <div class="tile-footer">
+            <span class="price-badge price-free">Free</span>
+            <a href="https://denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Animal-Shelter/Get-Involved/Volunteer-Animal-Shelter" class="tile-btn" target="_blank">View &#8594;</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <div class="tile-photo-placeholder">&#128049;</div>
+        <div class="tile-body">
+          <span class="cat-badge">Volunteer</span>
+          <div class="tile-name">MaxFund No-Kill Shelter — Animal Care Volunteer</div>
+          <div class="tile-meta">
+            <span>&#128197; Daily, 10 AM–4 PM</span>
+            <span>&#128205; Northwest Denver</span>
+          </div>
+          <div class="tile-desc">MaxFund's no-kill shelter needs dog walkers and cat socializers seven days a week. Volunteers start with an orientation on their area of interest — cats or dogs — then join the regular team.</div>
+          <div class="tile-footer">
+            <span class="price-badge price-free">Free</span>
+            <a href="https://maxfund.org/" class="tile-btn" target="_blank">View &#8594;</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <div class="tile-photo-placeholder">&#128218;</div>
+        <div class="tile-body">
+          <span class="cat-badge">Volunteer</span>
+          <div class="tile-name">Humane Colorado Teen Volunteer Program</div>
+          <div class="tile-meta">
+            <span>&#128197; Weekends, ongoing</span>
+            <span>&#128205; Humane Colorado, Englewood</span>
+          </div>
+          <div class="tile-desc">Teens 16–17 can earn service hours while supporting animal care, veterinary services, and adoptions at Humane Colorado. Commit 3 hrs/week for 6 months and gain real animal welfare experience.</div>
+          <div class="tile-footer">
+            <span class="price-badge price-free">Free</span>
+            <a href="https://humanecolorado.org/volunteer/" class="tile-btn" target="_blank">View &#8594;</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <div class="tile-photo-placeholder">&#129309;</div>
+        <div class="tile-body">
+          <span class="cat-badge">Volunteer</span>
+          <div class="tile-name">Mile High United Way — Community Support Volunteer</div>
+          <div class="tile-meta">
+            <span>&#128197; Flexible scheduling</span>
+            <span>&#128205; Various Denver locations</span>
+          </div>
+          <div class="tile-desc">Mile High United Way connects volunteers with youth mentoring, education, and community support programs across Denver. Sign up online and get matched with opportunities that fit your schedule.</div>
+          <div class="tile-footer">
+            <span class="price-badge price-free">Free</span>
+            <a href="https://www.unitedwaydenver.org/volunteer/" class="tile-btn" target="_blank">View &#8594;</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="feedback-box">
+    <h3>&#128140; Help me learn your taste</h3>
+    <p>Reply to the weekly email with:<br>
+    <code>LIKED: [event name]</code> &nbsp;or&nbsp; <code>SKIP: [event name]</code><br>
+    Your feedback shapes next week&rsquo;s digest.</p>
+  </div>
+  <p class="page-footer">Sent every Sunday &mdash; your personal Denver events agent.</p>
+
+</div>
+</body>
+</html>
