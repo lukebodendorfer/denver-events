@@ -8,10 +8,20 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f2f5; color: #1f2937; line-height: 1.5; }
 
-    .header { background: linear-gradient(135deg, #1a2744 0%, #2d4a8a 60%, #1e3a5f 100%); color: white; padding: 52px 24px 44px; text-align: center; }
+    .header { background: linear-gradient(135deg, #1a2744 0%, #2d4a8a 60%, #1e3a5f 100%); color: white; padding: 48px 24px 0; text-align: center; }
     .header h1 { font-size: 2.4em; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; text-shadow: 0 2px 8px rgba(0,0,0,0.25); }
     .header .subtitle { opacity: 0.8; font-size: 1em; margin-bottom: 16px; }
-    .week-badge { display: inline-block; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 5px 18px; font-size: 0.85em; }
+    .week-badge { display: inline-block; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 5px 18px; font-size: 0.85em; margin-bottom: 28px; }
+
+    /* Day filter bar — lives at the bottom of the header so it sticks cleanly */
+    .filter-bar { background: #1a2744; padding: 0 24px 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    .filter-bar::-webkit-scrollbar { display: none; }
+    .filter-pills { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+    .day-pill { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.85); border-radius: 20px; padding: 6px 16px; font-size: 0.82em; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background 0.15s, border-color 0.15s, color 0.15s; }
+    .day-pill:hover { background: rgba(255,255,255,0.22); }
+    .day-pill.active { background: white; color: #1a2744; border-color: white; }
+
+    .filter-sticky { position: sticky; top: 0; z-index: 50; }
 
     .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px 100px; }
 
@@ -23,6 +33,7 @@
     .music     .section-header { color: #7c3aed; }
     .arts      .section-header { color: #dc2626; }
     .volunteer .section-header { color: #059669; }
+    .section.hidden { display: none; }
 
     .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
 
@@ -30,6 +41,7 @@
     .tile:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.13); }
     .tile.voted-liked   { outline: 2px solid #16a34a; }
     .tile.voted-skipped { outline: 2px solid #dc2626; opacity: 0.72; }
+    .tile.day-hidden    { display: none; }
 
     .tile-photo { width: 100%; height: 190px; object-fit: cover; display: block; }
     .tile-photo-placeholder { width: 100%; height: 190px; display: flex; align-items: center; justify-content: center; font-size: 3.2em; }
@@ -47,10 +59,8 @@
     .volunteer .cat-badge { background: #d1fae5; color: #065f46; }
 
     .tile-name { font-weight: 700; font-size: 1.02em; color: #111827; margin-bottom: 8px; line-height: 1.4; }
-
     .tile-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
     .tile-meta span { color: #6b7280; font-size: 0.78em; }
-
     .tile-desc { color: #4b5563; font-size: 0.84em; line-height: 1.6; flex: 1; margin-bottom: 16px; }
 
     .tile-footer { display: flex; align-items: center; gap: 8px; margin-top: auto; }
@@ -70,6 +80,9 @@
     .arts      .tile-btn { color: #dc2626; border-color: #dc2626; }
     .volunteer .tile-btn { color: #059669; border-color: #059669; }
 
+    .no-events-msg { display: none; text-align: center; padding: 60px 20px; color: #6b7280; font-size: 0.95em; }
+    .no-events-msg strong { display: block; font-size: 1.3em; color: #374151; margin-bottom: 8px; }
+
     #feedback-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #1a2744; color: white; display: none; align-items: center; justify-content: center; gap: 16px; padding: 14px 24px; z-index: 100; box-shadow: 0 -4px 24px rgba(0,0,0,0.2); }
     #fb-summary { font-size: 0.9em; opacity: 0.85; }
     #fb-send  { background: white; color: #1a2744; border: none; border-radius: 8px; padding: 9px 20px; font-weight: 700; font-size: 0.85em; cursor: pointer; }
@@ -85,36 +98,50 @@
 </head>
 <body>
 
-<div class="header">
-  <h1>&#127956; Denver Weekly Events</h1>
-  <p class="subtitle">Curated for you every Sunday</p>
-  <div class="week-badge">&#128197; Week of July 14–20, 2026</div>
+<div class="filter-sticky">
+  <div class="header">
+    <h1>&#127956; Denver Weekly Events</h1>
+    <p class="subtitle">Curated for you every Sunday</p>
+    <div class="week-badge">&#128197; Week of July 14–20, 2026</div>
+  </div>
+  <div class="filter-bar">
+    <div class="filter-pills">
+      <button class="day-pill active" data-day="all">All Days</button>
+      <button class="day-pill" data-day="mon">Mon</button>
+      <button class="day-pill" data-day="tue">Tue</button>
+      <button class="day-pill" data-day="wed">Wed</button>
+      <button class="day-pill" data-day="thu">Thu</button>
+      <button class="day-pill" data-day="fri">Fri</button>
+      <button class="day-pill" data-day="sat">Sat</button>
+      <button class="day-pill" data-day="sun">Sun</button>
+    </div>
+  </div>
 </div>
 
 <div class="container">
 
   <!-- ===== SPORTS & OUTDOORS ===== -->
-  <div class="section sports">
+  <div class="section sports" id="sec-sports">
     <div class="section-header"><span class="section-icon">&#128692;</span><h2>Sports &amp; Outdoors</h2></div>
     <div class="tiles">
 
-      <div class="tile" data-event-name="DBTC Weekend Group Ride">
+      <div class="tile" data-event-name="DBTC Weekend Group Ride" data-days="sat">
         <img class="tile-photo" src="https://assets.simpleviewinc.com/simpleview/image/upload/c_fill,f_jpg,h_400,q_80,w_700/v1/clients/denver/Red_Rocks_ae920810-7c4f-436f-a7f7-521d168ab081.png" alt="Group Ride" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
         <div class="tile-photo-placeholder" style="display:none">&#128692;</div>
         <div class="tile-body">
           <span class="cat-badge">Sports &amp; Outdoors</span>
           <div class="tile-name">DBTC Weekend Group Ride</div>
           <div class="tile-meta"><span>&#128197; Sat Jul 19, 7:30 AM</span><span>&#128205; Confluence Park, Denver</span></div>
-          <div class="tile-desc">The Denver Bicycle Touring Club runs weekly organized rides leaving from multiple metro starting points. All paces welcome — casual to spirited. Great way to explore new routes with fellow cyclists.</div>
+          <div class="tile-desc">The Denver Bicycle Touring Club runs weekly organized rides from multiple metro starting points. All paces welcome — casual to spirited. Great way to explore new routes with fellow cyclists.</div>
           <div class="tile-footer">
-            <div class="vote-btns"><button class="vote-btn btn-like" title="Love it">&#128077;</button><button class="vote-btn btn-skip" title="Not for me">&#128078;</button></div>
+            <div class="vote-btns"><button class="vote-btn btn-like">&#128077;</button><button class="vote-btn btn-skip">&#128078;</button></div>
             <span class="price-badge price-free">Free</span>
             <a href="https://www.dbtc.org/" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile" data-event-name="Cherry Creek Trail Run 5K/10K">
+      <div class="tile" data-event-name="Cherry Creek Trail Run 5K/10K" data-days="sat">
         <div class="tile-photo-placeholder">&#127944;</div>
         <div class="tile-body">
           <span class="cat-badge">Sports &amp; Outdoors</span>
@@ -122,67 +149,67 @@
           <div class="tile-meta"><span>&#128197; Sat Jul 19, 8:00 AM</span><span>&#128205; Cherry Creek State Park, Glendale</span></div>
           <div class="tile-desc">Scenic trail run along the Cherry Creek corridor with 5K and 10K options. Flat, fast course through one of Denver's premier green spaces — suitable for all fitness levels.</div>
           <div class="tile-footer">
-            <div class="vote-btns"><button class="vote-btn btn-like" title="Love it">&#128077;</button><button class="vote-btn btn-skip" title="Not for me">&#128078;</button></div>
+            <div class="vote-btns"><button class="vote-btn btn-like">&#128077;</button><button class="vote-btn btn-skip">&#128078;</button></div>
             <span class="price-badge price-paid">$35–$50</span>
             <a href="https://findarace.com/us/running/trail-runs/colorado/denver" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile" data-event-name="Washington Park Kayak & Paddleboard">
+      <div class="tile" data-event-name="Washington Park Kayak & Paddleboard" data-days="mon,tue,wed,thu,fri,sat,sun">
         <div class="tile-photo-placeholder">&#128675;</div>
         <div class="tile-body">
           <span class="cat-badge">Sports &amp; Outdoors</span>
           <div class="tile-name">Washington Park Kayak &amp; Paddleboard</div>
           <div class="tile-meta"><span>&#128197; Daily, 10 AM–6 PM</span><span>&#128205; Wash Park Adventure Hub, Denver</span></div>
-          <div class="tile-desc">Rent a kayak, canoe, stand-up paddleboard, or bike from the Washington Park Adventure Hub and spend the morning on Smith Lake or Grasmere Lake. No reservation needed — just show up.</div>
+          <div class="tile-desc">Rent a kayak, canoe, stand-up paddleboard, or bike from the Washington Park Adventure Hub and spend the morning on Smith or Grasmere Lake. No reservation needed — just show up.</div>
           <div class="tile-footer">
-            <div class="vote-btns"><button class="vote-btn btn-like" title="Love it">&#128077;</button><button class="vote-btn btn-skip" title="Not for me">&#128078;</button></div>
+            <div class="vote-btns"><button class="vote-btn btn-like">&#128077;</button><button class="vote-btn btn-skip">&#128078;</button></div>
             <span class="price-badge price-paid">From $15/hr</span>
             <a href="https://denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Parks-Recreation/Activities-Programs/Outdoor-Recreation" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile" data-event-name="Rocky Mountain Arsenal Gravel Ride">
+      <div class="tile" data-event-name="Rocky Mountain Arsenal Gravel Ride" data-days="sun">
         <div class="tile-photo-placeholder">&#127968;</div>
         <div class="tile-body">
           <span class="cat-badge">Sports &amp; Outdoors</span>
           <div class="tile-name">Rocky Mountain Arsenal Gravel Ride</div>
           <div class="tile-meta"><span>&#128197; Sun Jul 20, 7:00 AM</span><span>&#128205; Rocky Mountain Arsenal NWR, Commerce City</span></div>
-          <div class="tile-desc">Self-guided gravel and paved loop through the Rocky Mountain Arsenal National Wildlife Refuge — one of Denver's hidden gems. Flat terrain with possible bison, deer, and bald eagle sightings.</div>
+          <div class="tile-desc">Self-guided gravel and paved loop through the Rocky Mountain Arsenal NWR. Flat terrain with possible bison, deer, and bald eagle sightings — one of Denver's most underrated outdoor spots.</div>
           <div class="tile-footer">
-            <div class="vote-btns"><button class="vote-btn btn-like" title="Love it">&#128077;</button><button class="vote-btn btn-skip" title="Not for me">&#128078;</button></div>
+            <div class="vote-btns"><button class="vote-btn btn-like">&#128077;</button><button class="vote-btn btn-skip">&#128078;</button></div>
             <span class="price-badge price-free">Free</span>
             <a href="https://www.fws.gov/refuge/rocky-mountain-arsenal" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile" data-event-name="Movement Climbing Drop-In Session">
+      <div class="tile" data-event-name="Movement Climbing Drop-In Session" data-days="mon,tue,wed,thu,fri,sat,sun">
         <div class="tile-photo-placeholder">&#129495;</div>
         <div class="tile-body">
           <span class="cat-badge">Sports &amp; Outdoors</span>
           <div class="tile-name">Movement Climbing Drop-In Session</div>
           <div class="tile-meta"><span>&#128197; Daily, various hours</span><span>&#128205; Movement RiNo, Denver</span></div>
-          <div class="tile-desc">Drop into one of Denver's top climbing gyms for bouldering or top rope. Movement RiNo has hundreds of problems set for all skill levels. Gear rental available — no experience required to start.</div>
+          <div class="tile-desc">Drop into one of Denver's top climbing gyms for bouldering or top rope. Hundreds of problems set for all skill levels. Gear rental available — no experience required to start.</div>
           <div class="tile-footer">
-            <div class="vote-btns"><button class="vote-btn btn-like" title="Love it">&#128077;</button><button class="vote-btn btn-skip" title="Not for me">&#128078;</button></div>
+            <div class="vote-btns"><button class="vote-btn btn-like">&#128077;</button><button class="vote-btn btn-skip">&#128078;</button></div>
             <span class="price-badge price-paid">$22 day pass</span>
             <a href="https://movementgyms.com/rino/" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile" data-event-name="Crested Butte Wildflower Festival Guided Hike">
+      <div class="tile" data-event-name="Crested Butte Wildflower Festival Guided Hike" data-days="mon,tue,wed,thu,fri,sat,sun">
         <div class="tile-photo-placeholder">&#127939;</div>
         <div class="tile-body">
           <span class="cat-badge">Sports &amp; Outdoors</span>
           <div class="tile-name">Crested Butte Wildflower Festival Guided Hike</div>
           <div class="tile-meta"><span>&#128197; Jul 10–19, various times</span><span>&#128205; Crested Butte, CO</span></div>
-          <div class="tile-desc">100+ wildflower workshops including expert-led hikes through peak bloom, Jeep tours, and art classes. Colorado's most spectacular wildflower display makes this a bucket-list summer outing.</div>
+          <div class="tile-desc">100+ wildflower workshops including expert-led hikes through peak bloom, Jeep tours, and art classes. Colorado's most spectacular wildflower display — a bucket-list summer outing.</div>
           <div class="tile-footer">
-            <div class="vote-btns"><button class="vote-btn btn-like" title="Love it">&#128077;</button><button class="vote-btn btn-skip" title="Not for me">&#128078;</button></div>
+            <div class="vote-btns"><button class="vote-btn btn-like">&#128077;</button><button class="vote-btn btn-skip">&#128078;</button></div>
             <span class="price-badge price-free">Free &amp; Ticketed</span>
             <a href="https://www.crestedbuttewildflowerfestival.com/" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
@@ -193,27 +220,27 @@
   </div>
 
   <!-- ===== MUSIC ===== -->
-  <div class="section music">
+  <div class="section music" id="sec-music">
     <div class="section-header"><span class="section-icon">&#127925;</span><h2>Music</h2></div>
     <div class="tiles">
 
-      <div class="tile" data-event-name="The Avett Brothers at Red Rocks">
+      <div class="tile" data-event-name="The Avett Brothers at Red Rocks" data-days="sat">
         <img class="tile-photo" src="https://assets.simpleviewinc.com/simpleview/image/upload/c_fill,f_jpg,h_400,q_80,w_700/v1/clients/denver/Red_Rocks_ae920810-7c4f-436f-a7f7-521d168ab081.png" alt="Red Rocks" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
         <div class="tile-photo-placeholder" style="display:none">&#127928;</div>
         <div class="tile-body">
           <span class="cat-badge">Music</span>
           <div class="tile-name">The Avett Brothers at Red Rocks</div>
           <div class="tile-meta"><span>&#128197; Sat Jul 19, 7:30 PM</span><span>&#128205; Red Rocks Amphitheatre, Morrison</span></div>
-          <div class="tile-desc">The Avett Brothers bring their signature folk-rock sound to the iconic Red Rocks with Asleep At the Wheel opening. One of summer's must-see outdoor concerts under Colorado's painted sky.</div>
+          <div class="tile-desc">The Avett Brothers bring their signature folk-rock sound to Red Rocks with Asleep At the Wheel opening. One of summer's must-see outdoor concerts under Colorado's painted sky.</div>
           <div class="tile-footer">
-            <div class="vote-btns"><button class="vote-btn btn-like" title="Love it">&#128077;</button><button class="vote-btn btn-skip" title="Not for me">&#128078;</button></div>
+            <div class="vote-btns"><button class="vote-btn btn-like">&#128077;</button><button class="vote-btn btn-skip">&#128078;</button></div>
             <span class="price-badge price-paid">$55+</span>
             <a href="https://www.songkick.com/metro-areas/6404-us-denver" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile" data-event-name="Daniel Caesar at Ball Arena">
+      <div class="tile" data-event-name="Daniel Caesar at Ball Arena" data-days="tue">
         <div class="tile-photo-placeholder">&#127926;</div>
         <div class="tile-body">
           <span class="cat-badge">Music</span>
@@ -221,14 +248,14 @@
           <div class="tile-meta"><span>&#128197; Tue Jul 14, 8:00 PM</span><span>&#128205; Ball Arena, Denver</span></div>
           <div class="tile-desc">R&amp;B artist Daniel Caesar performs his introspective "Son of Spergy" album live — a deeply personal record built on reconciliation, soul, and raw vocal runs. Expect a subdued, gorgeous production.</div>
           <div class="tile-footer">
-            <div class="vote-btns"><button class="vote-btn btn-like" title="Love it">&#128077;</button><button class="vote-btn btn-skip" title="Not for me">&#128078;</button></div>
+            <div class="vote-btns"><button class="vote-btn btn-like">&#128077;</button><button class="vote-btn btn-skip">&#128078;</button></div>
             <span class="price-badge price-paid">Ticketed</span>
             <a href="https://www.songkick.com/metro-areas/6404-us-denver" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile" data-event-name="Andy Frasco & The U.N. at Levitt Pavilion">
+      <div class="tile" data-event-name="Andy Frasco & The U.N. at Levitt Pavilion" data-days="sun">
         <div class="tile-photo-placeholder">&#127927;</div>
         <div class="tile-body">
           <span class="cat-badge">Music</span>
@@ -236,29 +263,29 @@
           <div class="tile-meta"><span>&#128197; Sun Jul 20, 7:30 PM</span><span>&#128205; Ruby Hill Park, Denver</span></div>
           <div class="tile-desc">High-energy soul/rock performer Andy Frasco brings his ensemble to Levitt Pavilion's free outdoor stage. Bring a blanket and lawn chairs — the mountain sunset backdrop is half the show.</div>
           <div class="tile-footer">
-            <div class="vote-btns"><button class="vote-btn btn-like" title="Love it">&#128077;</button><button class="vote-btn btn-skip" title="Not for me">&#128078;</button></div>
+            <div class="vote-btns"><button class="vote-btn btn-like">&#128077;</button><button class="vote-btn btn-skip">&#128078;</button></div>
             <span class="price-badge price-free">Free</span>
             <a href="https://levittdenver.org/" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile" data-event-name="Jazz Manouche at Denver French Fest">
+      <div class="tile" data-event-name="Jazz Manouche at Denver French Fest" data-days="fri,sat,sun">
         <div class="tile-photo-placeholder">&#127927;</div>
         <div class="tile-body">
           <span class="cat-badge">Music</span>
           <div class="tile-name">Jazz Manouche at Denver French Fest</div>
           <div class="tile-meta"><span>&#128197; Fri–Sun Jul 10–12, various</span><span>&#128205; LoDo, Downtown Denver</span></div>
-          <div class="tile-desc">Django Reinhardt–style jazz manouche performed live all weekend at Denver French Fest — three days of Provençal markets, French gastronomy, and contemporary art. Free admission the entire weekend.</div>
+          <div class="tile-desc">Django Reinhardt–style jazz manouche performed live all weekend at Denver French Fest — three days of Provençal markets, French gastronomy, and contemporary art. Free admission all weekend.</div>
           <div class="tile-footer">
-            <div class="vote-btns"><button class="vote-btn btn-like" title="Love it">&#128077;</button><button class="vote-btn btn-skip" title="Not for me">&#128078;</button></div>
+            <div class="vote-btns"><button class="vote-btn btn-like">&#128077;</button><button class="vote-btn btn-skip">&#128078;</button></div>
             <span class="price-badge price-free">Free</span>
             <a href="https://visitdenver.com/events/" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile" data-event-name="Futurebirds at Larimer Lounge">
+      <div class="tile" data-event-name="Futurebirds at Larimer Lounge" data-days="sat">
         <div class="tile-photo-placeholder">&#127928;</div>
         <div class="tile-body">
           <span class="cat-badge">Music</span>
@@ -266,22 +293,22 @@
           <div class="tile-meta"><span>&#128197; Sat Jul 19, 9:00 PM</span><span>&#128205; RiNo Arts District, Denver</span></div>
           <div class="tile-desc">Futurebirds blend Americana, indie rock, and Southern psychedelia into a loose, free-flowing set at one of Denver's best intimate venues. Early ticket purchase recommended — Larimer Lounge sells out.</div>
           <div class="tile-footer">
-            <div class="vote-btns"><button class="vote-btn btn-like" title="Love it">&#128077;</button><button class="vote-btn btn-skip" title="Not for me">&#128078;</button></div>
+            <div class="vote-btns"><button class="vote-btn btn-like">&#128077;</button><button class="vote-btn btn-skip">&#128078;</button></div>
             <span class="price-badge price-paid">$18</span>
             <a href="https://www.larimer-lounge.com/" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile" data-event-name="Blues at The Soiled Dove Underground">
+      <div class="tile" data-event-name="Blues Night at The Soiled Dove Underground" data-days="thu,fri,sat">
         <div class="tile-photo-placeholder">&#127929;</div>
         <div class="tile-body">
           <span class="cat-badge">Music</span>
           <div class="tile-name">Blues Night at The Soiled Dove Underground</div>
-          <div class="tile-meta"><span>&#128197; Thu–Sat, various</span><span>&#128205; The Soiled Dove, Denver</span></div>
-          <div class="tile-desc">Denver's premier intimate supper-club venue hosts rotating blues, soul, and roots acts in a seated dinner-show format. Check weekly schedule for this week's headliners — quality is consistently high.</div>
+          <div class="tile-meta"><span>&#128197; Thu–Sat, various showtimes</span><span>&#128205; The Soiled Dove, Denver</span></div>
+          <div class="tile-desc">Denver's premier intimate supper-club venue hosts rotating blues, soul, and roots acts in a seated dinner-show format. Check the weekly schedule for this week's headliners — quality is consistently high.</div>
           <div class="tile-footer">
-            <div class="vote-btns"><button class="vote-btn btn-like" title="Love it">&#128077;</button><button class="vote-btn btn-skip" title="Not for me">&#128078;</button></div>
+            <div class="vote-btns"><button class="vote-btn btn-like">&#128077;</button><button class="vote-btn btn-skip">&#128078;</button></div>
             <span class="price-badge price-paid">$20–$45</span>
             <a href="https://www.thesoileddove.com/" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
@@ -292,11 +319,11 @@
   </div>
 
   <!-- ===== ARTS & CULTURE ===== -->
-  <div class="section arts">
+  <div class="section arts" id="sec-arts">
     <div class="section-header"><span class="section-icon">&#127917;</span><h2>Art &amp; Culture</h2></div>
     <div class="tiles">
 
-      <div class="tile" data-event-name="Colorado Black Arts Festival">
+      <div class="tile" data-event-name="Colorado Black Arts Festival" data-days="fri,sat,sun">
         <img class="tile-photo" src="https://assets.simpleviewinc.com/simpleview/image/upload/c_fill,f_jpg,h_400,q_80,w_700/v1/clients/denver/VisitDenver_DefaultImage_35680010-80e3-4de3-9dd2-a5877d0e0abd.jpg" alt="Colorado Black Arts Festival" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
         <div class="tile-photo-placeholder" style="display:none">&#127912;</div>
         <div class="tile-body">
@@ -305,44 +332,44 @@
           <div class="tile-meta"><span>&#128197; Fri–Sun Jul 10–12</span><span>&#128205; City Park West, Denver</span></div>
           <div class="tile-desc">A beloved free annual celebration honoring African American art and culture — live performances, visual art exhibitions, local vendors, and food in the historic City Park West neighborhood.</div>
           <div class="tile-footer">
-            <div class="vote-btns"><button class="vote-btn btn-like" title="Love it">&#128077;</button><button class="vote-btn btn-skip" title="Not for me">&#128078;</button></div>
+            <div class="vote-btns"><button class="vote-btn btn-like">&#128077;</button><button class="vote-btn btn-skip">&#128078;</button></div>
             <span class="price-badge price-free">Free</span>
             <a href="https://visitdenver.com/blog/post/denver-events-this-weekend/" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile" data-event-name="Chaos Bloom Theater — Improv & Sketch Comedy">
+      <div class="tile" data-event-name="Chaos Bloom Theater — Improv & Sketch Comedy" data-days="thu,fri,sat,sun">
         <div class="tile-photo-placeholder">&#129315;</div>
         <div class="tile-body">
           <span class="cat-badge">Art &amp; Culture</span>
           <div class="tile-name">Chaos Bloom Theater — Improv &amp; Sketch Comedy</div>
           <div class="tile-meta"><span>&#128197; Thu–Sun, various showtimes</span><span>&#128205; Baker Neighborhood, Denver</span></div>
-          <div class="tile-desc">Denver's newest improv and sketch comedy theater in the Baker neighborhood features performers with roots in NYC, LA, and Chicago. Rotating shows Thursday through Sunday — check their calendar for this week's lineup.</div>
+          <div class="tile-desc">Denver's newest improv and sketch comedy theater features performers with roots in NYC, LA, and Chicago. Rotating shows Thursday through Sunday — check their calendar for this week's lineup.</div>
           <div class="tile-footer">
-            <div class="vote-btns"><button class="vote-btn btn-like" title="Love it">&#128077;</button><button class="vote-btn btn-skip" title="Not for me">&#128078;</button></div>
+            <div class="vote-btns"><button class="vote-btn btn-like">&#128077;</button><button class="vote-btn btn-skip">&#128078;</button></div>
             <span class="price-badge price-paid">$12–$20</span>
             <a href="https://chaosbloom.com/" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile" data-event-name="Blucifer's First Rodeo Music & Culture Festival">
+      <div class="tile" data-event-name="Blucifer's First Rodeo Music & Culture Festival" data-days="thu,fri,sat,sun">
         <div class="tile-photo-placeholder">&#127928;</div>
         <div class="tile-body">
           <span class="cat-badge">Art &amp; Culture</span>
           <div class="tile-name">Blucifer&rsquo;s First Rodeo Music &amp; Culture Festival</div>
-          <div class="tile-meta"><span>&#128197; Jul 23–26</span><span>&#128205; South Broadway, Denver</span></div>
+          <div class="tile-meta"><span>&#128197; Thu–Sun Jul 23–26</span><span>&#128205; South Broadway, Denver</span></div>
           <div class="tile-desc">~170 local bands across South Broadway's bars and venues, celebrating Denver's DIY music scene and neighborhood culture. One of Denver's most ambitious homegrown multi-day music festivals.</div>
           <div class="tile-footer">
-            <div class="vote-btns"><button class="vote-btn btn-like" title="Love it">&#128077;</button><button class="vote-btn btn-skip" title="Not for me">&#128078;</button></div>
+            <div class="vote-btns"><button class="vote-btn btn-like">&#128077;</button><button class="vote-btn btn-skip">&#128078;</button></div>
             <span class="price-badge price-paid">Ticketed</span>
             <a href="https://visitdenver.com/events/" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile" data-event-name="Denver French Fest">
+      <div class="tile" data-event-name="Denver French Fest" data-days="fri,sat,sun">
         <div class="tile-photo-placeholder">&#127924;</div>
         <div class="tile-body">
           <span class="cat-badge">Art &amp; Culture</span>
@@ -350,14 +377,14 @@
           <div class="tile-meta"><span>&#128197; Fri–Sun Jul 10–12</span><span>&#128205; LoDo, Downtown Denver</span></div>
           <div class="tile-desc">Three days of French culture: Provençal markets, world-class gastronomy, contemporary art installations, live jazz, and cinema. Fri 4–10 PM &middot; Sat 11 AM–10 PM &middot; Sun 11 AM–7 PM.</div>
           <div class="tile-footer">
-            <div class="vote-btns"><button class="vote-btn btn-like" title="Love it">&#128077;</button><button class="vote-btn btn-skip" title="Not for me">&#128078;</button></div>
+            <div class="vote-btns"><button class="vote-btn btn-like">&#128077;</button><button class="vote-btn btn-skip">&#128078;</button></div>
             <span class="price-badge price-free">Free</span>
             <a href="https://visitdenver.com/blog/post/denver-events-this-weekend/" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile" data-event-name="Denver Film Society Arthouse Screening">
+      <div class="tile" data-event-name="Denver Film Society Arthouse Screening" data-days="mon,tue,wed,thu,fri,sat,sun">
         <div class="tile-photo-placeholder">&#127916;</div>
         <div class="tile-body">
           <span class="cat-badge">Art &amp; Culture</span>
@@ -365,22 +392,22 @@
           <div class="tile-meta"><span>&#128197; Various dates this week</span><span>&#128205; Sie Film Center, Capitol Hill</span></div>
           <div class="tile-desc">Denver Film Society's Sie Film Center brings independent, international, and documentary films to Capitol Hill's arthouse cinema. Check the weekly schedule for curated selections and Q&amp;A sessions.</div>
           <div class="tile-footer">
-            <div class="vote-btns"><button class="vote-btn btn-like" title="Love it">&#128077;</button><button class="vote-btn btn-skip" title="Not for me">&#128078;</button></div>
+            <div class="vote-btns"><button class="vote-btn btn-like">&#128077;</button><button class="vote-btn btn-skip">&#128078;</button></div>
             <span class="price-badge price-paid">$12</span>
             <a href="https://denverfilm.org/" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile" data-event-name="Denver Performing Arts Summer Showcase">
+      <div class="tile" data-event-name="Denver Performing Arts Summer Showcase" data-days="mon,tue,wed,thu,fri,sat,sun">
         <div class="tile-photo-placeholder">&#127917;</div>
         <div class="tile-body">
           <span class="cat-badge">Art &amp; Culture</span>
           <div class="tile-name">Denver Performing Arts Summer Showcase</div>
           <div class="tile-meta"><span>&#128197; Ongoing through July</span><span>&#128205; Denver Performing Arts Complex</span></div>
-          <div class="tile-desc">The Denver Performing Arts Complex hosts rotating theater, comedy, and improv productions across multiple venues under one roof. Check the weekly schedule — something new opens almost every week.</div>
+          <div class="tile-desc">The Denver Performing Arts Complex hosts rotating theater, comedy, and improv productions across multiple venues under one roof. Something new opens almost every week this summer.</div>
           <div class="tile-footer">
-            <div class="vote-btns"><button class="vote-btn btn-like" title="Love it">&#128077;</button><button class="vote-btn btn-skip" title="Not for me">&#128078;</button></div>
+            <div class="vote-btns"><button class="vote-btn btn-like">&#128077;</button><button class="vote-btn btn-skip">&#128078;</button></div>
             <span class="price-badge price-paid">From $25</span>
             <a href="https://www.artsandvenuesdenver.com/events" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
@@ -391,11 +418,11 @@
   </div>
 
   <!-- ===== VOLUNTEER ===== -->
-  <div class="section volunteer">
+  <div class="section volunteer" id="sec-volunteer">
     <div class="section-header"><span class="section-icon">&#129309;</span><h2>Volunteer Opportunities</h2></div>
     <div class="tiles">
 
-      <div class="tile" data-event-name="Denver Kids — Youth Mentoring">
+      <div class="tile" data-event-name="Denver Kids — Youth Mentoring" data-days="mon,tue,wed,thu,fri,sat,sun">
         <div class="tile-photo-placeholder">&#129489;</div>
         <div class="tile-body">
           <span class="cat-badge">Volunteer</span>
@@ -403,74 +430,74 @@
           <div class="tile-meta"><span>&#128197; 2x/month, flexible scheduling</span><span>&#128205; Denver Public Schools</span></div>
           <div class="tile-desc">Become a one-on-one mentor for a Denver Public Schools student. Meet twice a month to be a consistent, caring role model — 3–8 hours/month. One of the city's most impactful mentoring programs.</div>
           <div class="tile-footer">
-            <div class="vote-btns"><button class="vote-btn btn-like" title="Love it">&#128077;</button><button class="vote-btn btn-skip" title="Not for me">&#128078;</button></div>
+            <div class="vote-btns"><button class="vote-btn btn-like">&#128077;</button><button class="vote-btn btn-skip">&#128078;</button></div>
             <span class="price-badge price-free">Free</span>
             <a href="https://www.denverkids.org/get-involved" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile" data-event-name="Slow Food Denver — Seed to Plate Garden & Cooking Volunteer">
+      <div class="tile" data-event-name="Slow Food Denver — Seed to Plate Volunteer" data-days="mon,tue,wed,thu,fri,sat,sun">
         <div class="tile-photo-placeholder">&#127807;</div>
         <div class="tile-body">
           <span class="cat-badge">Volunteer</span>
           <div class="tile-name">Slow Food Denver — Seed to Plate Volunteer</div>
           <div class="tile-meta"><span>&#128197; Weekly Jun–Sep, various schools</span><span>&#128205; Denver schools &amp; gardens</span></div>
-          <div class="tile-desc">Help bring cooking and gardening classes to Denver students through Slow Food Denver's Seed to Plate program. Each class has one instructor and one volunteer — weekly slots available all summer.</div>
+          <div class="tile-desc">Help bring cooking and gardening classes to Denver students. Each class has one instructor and one volunteer — weekly slots available all summer at schools across the city.</div>
           <div class="tile-footer">
-            <div class="vote-btns"><button class="vote-btn btn-like" title="Love it">&#128077;</button><button class="vote-btn btn-skip" title="Not for me">&#128078;</button></div>
+            <div class="vote-btns"><button class="vote-btn btn-like">&#128077;</button><button class="vote-btn btn-skip">&#128078;</button></div>
             <span class="price-badge price-free">Free</span>
             <a href="https://www.slowfooddenver.org/volunteer" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile" data-event-name="Denver Rescue Mission — Meal Service Volunteer">
+      <div class="tile" data-event-name="Denver Rescue Mission — Meal Service" data-days="mon,tue,wed,thu,fri,sat,sun">
         <div class="tile-photo-placeholder">&#127859;</div>
         <div class="tile-body">
           <span class="cat-badge">Volunteer</span>
           <div class="tile-name">Denver Rescue Mission — Meal Service</div>
           <div class="tile-meta"><span>&#128197; Daily, morning &amp; evening shifts</span><span>&#128205; Downtown Denver</span></div>
-          <div class="tile-desc">Serve hot meals to individuals experiencing homelessness at the Denver Rescue Mission. Volunteers also help sort donations and support mentoring programs. Walk-in shifts available most days.</div>
+          <div class="tile-desc">Serve hot meals to individuals experiencing homelessness at the Denver Rescue Mission. Walk-in shifts available most days — volunteers also help sort donations and support mentoring programs.</div>
           <div class="tile-footer">
-            <div class="vote-btns"><button class="vote-btn btn-like" title="Love it">&#128077;</button><button class="vote-btn btn-skip" title="Not for me">&#128078;</button></div>
+            <div class="vote-btns"><button class="vote-btn btn-like">&#128077;</button><button class="vote-btn btn-skip">&#128078;</button></div>
             <span class="price-badge price-free">Free</span>
             <a href="https://denverrescuemission.org/volunteer/" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile" data-event-name="Food Bank of the Rockies — Warehouse Volunteer">
+      <div class="tile" data-event-name="Food Bank of the Rockies — Warehouse Volunteer" data-days="mon,tue,wed,thu,fri,sat">
         <div class="tile-photo-placeholder">&#128099;</div>
         <div class="tile-body">
           <span class="cat-badge">Volunteer</span>
           <div class="tile-name">Food Bank of the Rockies — Warehouse Volunteer</div>
           <div class="tile-meta"><span>&#128197; Mon–Sat, 2-hr shifts</span><span>&#128205; Commerce City, Denver</span></div>
-          <div class="tile-desc">Sort and pack food donations at the Food Bank of the Rockies' main warehouse — your shift directly fills boxes for families across Colorado. Sign up online for a 2-hour slot any day of the week.</div>
+          <div class="tile-desc">Sort and pack food donations at the Food Bank of the Rockies' main warehouse. Your shift directly fills boxes for families across Colorado. Sign up online for a 2-hour slot any weekday or Saturday.</div>
           <div class="tile-footer">
-            <div class="vote-btns"><button class="vote-btn btn-like" title="Love it">&#128077;</button><button class="vote-btn btn-skip" title="Not for me">&#128078;</button></div>
+            <div class="vote-btns"><button class="vote-btn btn-like">&#128077;</button><button class="vote-btn btn-skip">&#128078;</button></div>
             <span class="price-badge price-free">Free</span>
             <a href="https://feedingcolorado.org/volunteer/" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile" data-event-name="Denver Food Rescue — Bike Delivery Volunteer">
+      <div class="tile" data-event-name="Denver Food Rescue — Bike Delivery Volunteer" data-days="sat,sun">
         <div class="tile-photo-placeholder">&#128692;</div>
         <div class="tile-body">
           <span class="cat-badge">Volunteer</span>
           <div class="tile-name">Denver Food Rescue — Bike Delivery Volunteer</div>
           <div class="tile-meta"><span>&#128197; Weekends, 1–2 hr shifts</span><span>&#128205; Various Denver neighborhoods</span></div>
-          <div class="tile-desc">Rescue surplus food from grocery stores and deliver it by bike to community organizations serving food-insecure Denver residents. A fun, active way to fight food waste — bring your own bike or borrow one.</div>
+          <div class="tile-desc">Rescue surplus food from grocery stores and deliver it by bike to community organizations serving food-insecure residents. A fun, active way to fight food waste — bring your own bike or borrow one.</div>
           <div class="tile-footer">
-            <div class="vote-btns"><button class="vote-btn btn-like" title="Love it">&#128077;</button><button class="vote-btn btn-skip" title="Not for me">&#128078;</button></div>
+            <div class="vote-btns"><button class="vote-btn btn-like">&#128077;</button><button class="vote-btn btn-skip">&#128078;</button></div>
             <span class="price-badge price-free">Free</span>
             <a href="https://denverfoodrescue.org/volunteer/" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile" data-event-name="Mile High United Way — Community Support Volunteer">
+      <div class="tile" data-event-name="Mile High United Way — Community Support Volunteer" data-days="mon,tue,wed,thu,fri,sat,sun">
         <div class="tile-photo-placeholder">&#129309;</div>
         <div class="tile-body">
           <span class="cat-badge">Volunteer</span>
@@ -478,7 +505,7 @@
           <div class="tile-meta"><span>&#128197; Flexible scheduling</span><span>&#128205; Various Denver locations</span></div>
           <div class="tile-desc">Mile High United Way connects volunteers with youth education, literacy tutoring, and community support programs across Denver. Sign up online to get matched with opportunities that fit your schedule.</div>
           <div class="tile-footer">
-            <div class="vote-btns"><button class="vote-btn btn-like" title="Love it">&#128077;</button><button class="vote-btn btn-skip" title="Not for me">&#128078;</button></div>
+            <div class="vote-btns"><button class="vote-btn btn-like">&#128077;</button><button class="vote-btn btn-skip">&#128078;</button></div>
             <span class="price-badge price-free">Free</span>
             <a href="https://www.unitedwaydenver.org/volunteer/" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
@@ -486,6 +513,11 @@
       </div>
 
     </div>
+  </div>
+
+  <div class="no-events-msg" id="no-events">
+    <strong>No events on that day</strong>
+    Try a different day or select &ldquo;All Days&rdquo; to see everything.
   </div>
 
   <div class="page-footer-note">
@@ -504,6 +536,40 @@
 
 <script>
 (function () {
+  /* ---- Day filter ---- */
+  var activeDay = 'all';
+
+  function applyDayFilter(day) {
+    activeDay = day;
+    document.querySelectorAll('.day-pill').forEach(function(p) {
+      p.classList.toggle('active', p.dataset.day === day);
+    });
+
+    var totalVisible = 0;
+    ['sports', 'music', 'arts', 'volunteer'].forEach(function(cat) {
+      var section = document.getElementById('sec-' + cat);
+      var tiles = section.querySelectorAll('.tile');
+      var visibleInSection = 0;
+      tiles.forEach(function(tile) {
+        var days = tile.dataset.days.split(',');
+        var show = day === 'all' || days.indexOf(day) !== -1;
+        tile.classList.toggle('day-hidden', !show);
+        if (show) { visibleInSection++; totalVisible++; }
+      });
+      section.classList.toggle('hidden', visibleInSection === 0);
+    });
+
+    var msg = document.getElementById('no-events');
+    msg.style.display = totalVisible === 0 ? 'block' : 'none';
+  }
+
+  document.querySelectorAll('.day-pill').forEach(function(pill) {
+    pill.addEventListener('click', function() {
+      applyDayFilter(pill.dataset.day);
+    });
+  });
+
+  /* ---- Feedback / voting ---- */
   var KEY = 'denver_events_prefs';
   function getPrefs() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e) { return {}; } }
   function savePrefs(p) { localStorage.setItem(KEY, JSON.stringify(p)); }
@@ -513,10 +579,10 @@
     var prefs = getPrefs();
     if (prefs[name] === action) { delete prefs[name]; } else { prefs[name] = action; }
     savePrefs(prefs);
-    refreshAll();
+    refreshVotes();
   }
 
-  function refreshAll() {
+  function refreshVotes() {
     var prefs = getPrefs();
     document.querySelectorAll('.tile[data-event-name]').forEach(function(tile) {
       var pref = prefs[tile.dataset.eventName];
@@ -539,22 +605,20 @@
   function sendFeedback() {
     var prefs = getPrefs();
     var lines = Object.entries(prefs).map(function(e){ return (e[1]==='liked'?'LIKED: ':'SKIP: ')+e[0]; });
-    var subject = encodeURIComponent('Denver Events Feedback');
-    var body = encodeURIComponent(lines.join('\n'));
-    window.location.href = 'mailto:lukebodendorfer@gmail.com?subject='+subject+'&body='+body;
+    window.location.href = 'mailto:lukebodendorfer@gmail.com?subject=' + encodeURIComponent('Denver Events Feedback') + '&body=' + encodeURIComponent(lines.join('\n'));
   }
 
   document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.vote-btn').forEach(function(btn) {
       btn.addEventListener('click', function(e) {
         e.stopPropagation();
-        var tile = btn.closest('[data-event-name]');
-        applyVote(tile, btn.classList.contains('btn-like') ? 'liked' : 'skipped');
+        applyVote(btn.closest('[data-event-name]'), btn.classList.contains('btn-like') ? 'liked' : 'skipped');
       });
     });
     document.getElementById('fb-send').addEventListener('click', sendFeedback);
-    document.getElementById('fb-clear').addEventListener('click', function() { localStorage.removeItem(KEY); refreshAll(); });
-    refreshAll();
+    document.getElementById('fb-clear').addEventListener('click', function() { localStorage.removeItem(KEY); refreshVotes(); });
+    refreshVotes();
+    applyDayFilter('all');
   });
 })();
 </script>
