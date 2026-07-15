@@ -13,7 +13,7 @@
     .header .subtitle { opacity: 0.8; font-size: 1em; margin-bottom: 16px; }
     .week-badge { display: inline-block; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 5px 18px; font-size: 0.85em; }
 
-    .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px 60px; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px 100px; }
 
     .section { margin-bottom: 56px; }
     .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 3px solid currentColor; }
@@ -27,7 +27,9 @@
     .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
 
     .tile { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.08); display: flex; flex-direction: column; transition: transform 0.2s ease, box-shadow 0.2s ease; }
-    .tile:hover { transform: translateY(-5px); box-shadow: 0 12px 32px rgba(0,0,0,0.13); }
+    .tile:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.13); }
+    .tile.voted-liked { outline: 2px solid #16a34a; }
+    .tile.voted-skipped { outline: 2px solid #dc2626; opacity: 0.75; }
 
     .tile-photo { width: 100%; height: 190px; object-fit: cover; display: block; }
     .tile-photo-placeholder { width: 100%; height: 190px; display: flex; align-items: center; justify-content: center; font-size: 3.2em; }
@@ -51,8 +53,14 @@
 
     .tile-desc { color: #4b5563; font-size: 0.84em; line-height: 1.6; flex: 1; margin-bottom: 16px; }
 
-    .tile-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; }
-    .price-badge { border-radius: 20px; padding: 4px 12px; font-size: 0.74em; font-weight: 700; }
+    .tile-footer { display: flex; align-items: center; gap: 8px; margin-top: auto; }
+    .vote-btns { display: flex; gap: 4px; margin-right: auto; }
+    .vote-btn { background: #f3f4f6; border: none; border-radius: 8px; padding: 6px 10px; font-size: 1em; cursor: pointer; transition: background 0.15s, transform 0.1s; line-height: 1; }
+    .vote-btn:hover { background: #e5e7eb; transform: scale(1.15); }
+    .vote-btn.active-like { background: #dcfce7; }
+    .vote-btn.active-skip { background: #fee2e2; }
+
+    .price-badge { border-radius: 20px; padding: 4px 12px; font-size: 0.74em; font-weight: 700; white-space: nowrap; }
     .price-free { background: #dcfce7; color: #14532d; }
     .price-paid { background: #f3f4f6; color: #374151; }
     .tile-btn { display: inline-block; padding: 8px 16px; border-radius: 8px; font-size: 0.8em; font-weight: 700; text-decoration: none; border: 2px solid; white-space: nowrap; transition: opacity 0.15s; }
@@ -62,10 +70,23 @@
     .arts    .tile-btn { color: #dc2626; border-color: #dc2626; }
     .volunteer .tile-btn { color: #059669; border-color: #059669; }
 
-    .feedback-box { background: white; border-radius: 16px; padding: 28px 32px; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-top: 4px solid #6366f1; margin-top: 8px; }
-    .feedback-box h3 { font-size: 1.05em; font-weight: 700; margin-bottom: 10px; }
-    .feedback-box p { color: #6b7280; font-size: 0.9em; line-height: 1.8; }
-    .feedback-box code { background: #f3f4f6; padding: 2px 10px; border-radius: 6px; font-family: monospace; font-size: 0.88em; }
+    /* Sticky feedback bar */
+    #feedback-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #1a2744; color: white;
+      display: none; align-items: center; justify-content: center; gap: 16px;
+      padding: 14px 24px; z-index: 100;
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.2);
+    }
+    #fb-summary { font-size: 0.9em; opacity: 0.85; }
+    #fb-send { background: white; color: #1a2744; border: none; border-radius: 8px; padding: 9px 20px; font-weight: 700; font-size: 0.85em; cursor: pointer; transition: opacity 0.15s; }
+    #fb-send:hover { opacity: 0.85; }
+    #fb-clear { background: transparent; color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; padding: 8px 14px; font-size: 0.8em; cursor: pointer; transition: opacity 0.15s; }
+    #fb-clear:hover { opacity: 0.7; }
+
+    .page-footer-note { background: white; border-radius: 16px; padding: 24px 32px; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-top: 4px solid #6366f1; margin-top: 8px; }
+    .page-footer-note h3 { font-size: 1.05em; font-weight: 700; margin-bottom: 8px; }
+    .page-footer-note p { color: #6b7280; font-size: 0.88em; line-height: 1.7; }
     .page-footer { text-align: center; color: #9ca3af; font-size: 0.78em; margin-top: 28px; padding-bottom: 20px; }
   </style>
 </head>
@@ -87,7 +108,7 @@
     </div>
     <div class="tiles">
 
-      <div class="tile">
+      <div class="tile" data-event-name="DBTC Weekend Group Ride">
         <img class="tile-photo" src="https://assets.simpleviewinc.com/simpleview/image/upload/c_fill,f_jpg,h_400,q_80,w_700/v1/clients/denver/Red_Rocks_ae920810-7c4f-436f-a7f7-521d168ab081.png" alt="DBTC Group Ride" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
         <div class="tile-photo-placeholder" style="display:none">&#128692;</div>
         <div class="tile-body">
@@ -99,13 +120,17 @@
           </div>
           <div class="tile-desc">The Denver Bicycle Touring Club runs organized group rides from multiple starting points across the metro area. All paces welcome — great for meeting fellow cyclists and exploring new routes.</div>
           <div class="tile-footer">
+            <div class="vote-btns">
+              <button class="vote-btn btn-like" title="I liked this">&#128077;</button>
+              <button class="vote-btn btn-skip" title="Not for me">&#128078;</button>
+            </div>
             <span class="price-badge price-free">Free</span>
             <a href="https://www.dbtc.org/" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile">
+      <div class="tile" data-event-name="Crested Butte Wildflower Festival Guided Hike">
         <div class="tile-photo-placeholder">&#127939;</div>
         <div class="tile-body">
           <span class="cat-badge">Sports &amp; Outdoors</span>
@@ -116,13 +141,17 @@
           </div>
           <div class="tile-desc">100+ wildflower-focused workshops including guided hikes through peak bloom, Jeep adventures, and art classes set against Colorado's most spectacular wildflower display.</div>
           <div class="tile-footer">
+            <div class="vote-btns">
+              <button class="vote-btn btn-like" title="I liked this">&#128077;</button>
+              <button class="vote-btn btn-skip" title="Not for me">&#128078;</button>
+            </div>
             <span class="price-badge price-free">Free &amp; Ticketed</span>
             <a href="https://www.crestedbuttewildflowerfestival.com/" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile">
+      <div class="tile" data-event-name="Rocky Mountain Arsenal Gravel Ride">
         <div class="tile-photo-placeholder">&#127968;</div>
         <div class="tile-body">
           <span class="cat-badge">Sports &amp; Outdoors</span>
@@ -133,13 +162,17 @@
           </div>
           <div class="tile-desc">Self-guided gravel ride through the Rocky Mountain Arsenal National Wildlife Refuge — one of Denver's hidden gems. Flat, paved/gravel mix with possible bison sightings.</div>
           <div class="tile-footer">
+            <div class="vote-btns">
+              <button class="vote-btn btn-like" title="I liked this">&#128077;</button>
+              <button class="vote-btn btn-skip" title="Not for me">&#128078;</button>
+            </div>
             <span class="price-badge price-free">Free</span>
             <a href="https://www.fws.gov/refuge/rocky-mountain-arsenal" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile">
+      <div class="tile" data-event-name="Cherry Creek Trail Run 5K/10K">
         <div class="tile-photo-placeholder">&#127944;</div>
         <div class="tile-body">
           <span class="cat-badge">Sports &amp; Outdoors</span>
@@ -150,6 +183,10 @@
           </div>
           <div class="tile-desc">Scenic trail run along the Cherry Creek corridor with 5K and 10K options. Flat, fast course through one of Denver's premier green spaces — perfect for all fitness levels.</div>
           <div class="tile-footer">
+            <div class="vote-btns">
+              <button class="vote-btn btn-like" title="I liked this">&#128077;</button>
+              <button class="vote-btn btn-skip" title="Not for me">&#128078;</button>
+            </div>
             <span class="price-badge price-paid">$35–$50</span>
             <a href="https://findarace.com/us/running/trail-runs/colorado/denver" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
@@ -167,7 +204,7 @@
     </div>
     <div class="tiles">
 
-      <div class="tile">
+      <div class="tile" data-event-name="The Avett Brothers at Red Rocks">
         <img class="tile-photo" src="https://assets.simpleviewinc.com/simpleview/image/upload/c_fill,f_jpg,h_400,q_80,w_700/v1/clients/denver/Red_Rocks_ae920810-7c4f-436f-a7f7-521d168ab081.png" alt="The Avett Brothers at Red Rocks" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
         <div class="tile-photo-placeholder" style="display:none">&#127928;</div>
         <div class="tile-body">
@@ -179,13 +216,17 @@
           </div>
           <div class="tile-desc">The Avett Brothers bring their signature folk-rock sound to the iconic Red Rocks with Asleep At the Wheel opening. One of summer's must-see outdoor shows.</div>
           <div class="tile-footer">
+            <div class="vote-btns">
+              <button class="vote-btn btn-like" title="I liked this">&#128077;</button>
+              <button class="vote-btn btn-skip" title="Not for me">&#128078;</button>
+            </div>
             <span class="price-badge price-paid">$55+</span>
             <a href="https://www.songkick.com/metro-areas/6404-us-denver/this-weekend" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile">
+      <div class="tile" data-event-name="Andy Frasco & The U.N. at Levitt Pavilion">
         <div class="tile-photo-placeholder">&#127926;</div>
         <div class="tile-body">
           <span class="cat-badge">Music</span>
@@ -196,13 +237,17 @@
           </div>
           <div class="tile-desc">High-energy soul/rock performer Andy Frasco brings his U.N. ensemble to Levitt Pavilion's free outdoor stage at Ruby Hill Park. Bring a blanket and enjoy the mountain sunset backdrop.</div>
           <div class="tile-footer">
+            <div class="vote-btns">
+              <button class="vote-btn btn-like" title="I liked this">&#128077;</button>
+              <button class="vote-btn btn-skip" title="Not for me">&#128078;</button>
+            </div>
             <span class="price-badge price-free">Free</span>
             <a href="https://levittdenver.org/" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile">
+      <div class="tile" data-event-name="Jazz Manouche at Denver French Fest">
         <div class="tile-photo-placeholder">&#127927;</div>
         <div class="tile-body">
           <span class="cat-badge">Music</span>
@@ -213,13 +258,17 @@
           </div>
           <div class="tile-desc">Live Django Reinhardt–style jazz manouche is the sonic backdrop of Denver French Fest — three days of Provençal markets, French gastronomy, and contemporary art. Free admission all weekend.</div>
           <div class="tile-footer">
+            <div class="vote-btns">
+              <button class="vote-btn btn-like" title="I liked this">&#128077;</button>
+              <button class="vote-btn btn-skip" title="Not for me">&#128078;</button>
+            </div>
             <span class="price-badge price-free">Free</span>
             <a href="https://visitdenver.com/blog/post/denver-events-this-weekend/" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile">
+      <div class="tile" data-event-name="Futurebirds at Larimer Lounge">
         <div class="tile-photo-placeholder">&#127928;</div>
         <div class="tile-body">
           <span class="cat-badge">Music</span>
@@ -230,6 +279,10 @@
           </div>
           <div class="tile-desc">Futurebirds blend Americana, indie rock, and Southern psychedelia into a laid-back summer show at one of Denver's best small venues. Expect a loose, free-flowing set.</div>
           <div class="tile-footer">
+            <div class="vote-btns">
+              <button class="vote-btn btn-like" title="I liked this">&#128077;</button>
+              <button class="vote-btn btn-skip" title="Not for me">&#128078;</button>
+            </div>
             <span class="price-badge price-paid">$18</span>
             <a href="https://www.larimer-lounge.com/" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
@@ -247,7 +300,7 @@
     </div>
     <div class="tiles">
 
-      <div class="tile">
+      <div class="tile" data-event-name="Colorado Black Arts Festival">
         <img class="tile-photo" src="https://assets.simpleviewinc.com/simpleview/image/upload/c_fill,f_jpg,h_400,q_80,w_700/v1/clients/denver/VisitDenver_DefaultImage_35680010-80e3-4de3-9dd2-a5877d0e0abd.jpg" alt="Colorado Black Arts Festival" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
         <div class="tile-photo-placeholder" style="display:none">&#127912;</div>
         <div class="tile-body">
@@ -259,13 +312,17 @@
           </div>
           <div class="tile-desc">This beloved free annual celebration honors African American art and culture with live performances, visual art exhibitions, and vendors in the historic City Park West neighborhood.</div>
           <div class="tile-footer">
+            <div class="vote-btns">
+              <button class="vote-btn btn-like" title="I liked this">&#128077;</button>
+              <button class="vote-btn btn-skip" title="Not for me">&#128078;</button>
+            </div>
             <span class="price-badge price-free">Free</span>
             <a href="https://visitdenver.com/blog/post/denver-events-this-weekend/" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile">
+      <div class="tile" data-event-name="Denver French Fest">
         <div class="tile-photo-placeholder">&#127924;</div>
         <div class="tile-body">
           <span class="cat-badge">Art &amp; Culture</span>
@@ -276,13 +333,17 @@
           </div>
           <div class="tile-desc">Three days of French culture: Provençal markets, world-class gastronomy, contemporary art installations, live music, and cinema. Friday 4–10 PM · Saturday 11 AM–10 PM · Sunday 11 AM–7 PM.</div>
           <div class="tile-footer">
+            <div class="vote-btns">
+              <button class="vote-btn btn-like" title="I liked this">&#128077;</button>
+              <button class="vote-btn btn-skip" title="Not for me">&#128078;</button>
+            </div>
             <span class="price-badge price-free">Free</span>
             <a href="https://visitdenver.com/blog/post/denver-events-this-weekend/" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile">
+      <div class="tile" data-event-name="Denver Film Society Arthouse Screening">
         <div class="tile-photo-placeholder">&#127916;</div>
         <div class="tile-body">
           <span class="cat-badge">Art &amp; Culture</span>
@@ -293,13 +354,17 @@
           </div>
           <div class="tile-desc">Denver Film Society's Sie Film Center brings independent, international, and documentary films to Capitol Hill's arthouse cinema. Check schedule for this week's curated selections.</div>
           <div class="tile-footer">
+            <div class="vote-btns">
+              <button class="vote-btn btn-like" title="I liked this">&#128077;</button>
+              <button class="vote-btn btn-skip" title="Not for me">&#128078;</button>
+            </div>
             <span class="price-badge price-paid">$12</span>
             <a href="https://denverfilm.org/" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile">
+      <div class="tile" data-event-name="Denver Performing Arts Summer Showcase">
         <div class="tile-photo-placeholder">&#127917;</div>
         <div class="tile-body">
           <span class="cat-badge">Art &amp; Culture</span>
@@ -310,6 +375,10 @@
           </div>
           <div class="tile-desc">The Denver Performing Arts Complex hosts rotating theater, comedy, and improv shows through the summer season. Multiple venues under one roof — check the weekly schedule for current productions.</div>
           <div class="tile-footer">
+            <div class="vote-btns">
+              <button class="vote-btn btn-like" title="I liked this">&#128077;</button>
+              <button class="vote-btn btn-skip" title="Not for me">&#128078;</button>
+            </div>
             <span class="price-badge price-paid">From $25</span>
             <a href="https://www.artsandvenuesdenver.com/events" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
@@ -327,7 +396,7 @@
     </div>
     <div class="tiles">
 
-      <div class="tile">
+      <div class="tile" data-event-name="Denver Animal Shelter — Dog Walking & Cat Socialization">
         <div class="tile-photo-placeholder">&#128054;</div>
         <div class="tile-body">
           <span class="cat-badge">Volunteer</span>
@@ -338,13 +407,17 @@
           </div>
           <div class="tile-desc">Walk, socialize, and provide enrichment for animals at Denver's city shelter. Volunteers 16+ can join without prior experience. Ongoing commitment preferred but drop-ins welcome.</div>
           <div class="tile-footer">
+            <div class="vote-btns">
+              <button class="vote-btn btn-like" title="I liked this">&#128077;</button>
+              <button class="vote-btn btn-skip" title="Not for me">&#128078;</button>
+            </div>
             <span class="price-badge price-free">Free</span>
             <a href="https://denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Animal-Shelter/Get-Involved/Volunteer-Animal-Shelter" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile">
+      <div class="tile" data-event-name="MaxFund No-Kill Shelter — Animal Care Volunteer">
         <div class="tile-photo-placeholder">&#128049;</div>
         <div class="tile-body">
           <span class="cat-badge">Volunteer</span>
@@ -355,13 +428,17 @@
           </div>
           <div class="tile-desc">MaxFund's no-kill shelter needs dog walkers and cat socializers seven days a week. Volunteers start with an orientation on their area of interest — cats or dogs — then join the regular team.</div>
           <div class="tile-footer">
+            <div class="vote-btns">
+              <button class="vote-btn btn-like" title="I liked this">&#128077;</button>
+              <button class="vote-btn btn-skip" title="Not for me">&#128078;</button>
+            </div>
             <span class="price-badge price-free">Free</span>
             <a href="https://maxfund.org/" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile">
+      <div class="tile" data-event-name="Humane Colorado Teen Volunteer Program">
         <div class="tile-photo-placeholder">&#128218;</div>
         <div class="tile-body">
           <span class="cat-badge">Volunteer</span>
@@ -372,13 +449,17 @@
           </div>
           <div class="tile-desc">Teens 16–17 can earn service hours while supporting animal care, veterinary services, and adoptions at Humane Colorado. Commit 3 hrs/week for 6 months and gain real animal welfare experience.</div>
           <div class="tile-footer">
+            <div class="vote-btns">
+              <button class="vote-btn btn-like" title="I liked this">&#128077;</button>
+              <button class="vote-btn btn-skip" title="Not for me">&#128078;</button>
+            </div>
             <span class="price-badge price-free">Free</span>
             <a href="https://humanecolorado.org/volunteer/" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
         </div>
       </div>
 
-      <div class="tile">
+      <div class="tile" data-event-name="Mile High United Way — Community Support Volunteer">
         <div class="tile-photo-placeholder">&#129309;</div>
         <div class="tile-body">
           <span class="cat-badge">Volunteer</span>
@@ -389,6 +470,10 @@
           </div>
           <div class="tile-desc">Mile High United Way connects volunteers with youth mentoring, education, and community support programs across Denver. Sign up online and get matched with opportunities that fit your schedule.</div>
           <div class="tile-footer">
+            <div class="vote-btns">
+              <button class="vote-btn btn-like" title="I liked this">&#128077;</button>
+              <button class="vote-btn btn-skip" title="Not for me">&#128078;</button>
+            </div>
             <span class="price-badge price-free">Free</span>
             <a href="https://www.unitedwaydenver.org/volunteer/" class="tile-btn" target="_blank">View &#8594;</a>
           </div>
@@ -398,14 +483,103 @@
     </div>
   </div>
 
-  <div class="feedback-box">
-    <h3>&#128140; Help me learn your taste</h3>
-    <p>Reply to the weekly email with:<br>
-    <code>LIKED: [event name]</code> &nbsp;or&nbsp; <code>SKIP: [event name]</code><br>
-    Your feedback shapes next week&rsquo;s digest.</p>
+  <div class="page-footer-note">
+    <h3>&#128077; Rate events directly on this page</h3>
+    <p>Tap the thumbs on any event tile — your choices are saved and a summary email will be drafted for you when you click &ldquo;Send Feedback&rdquo; below.</p>
   </div>
   <p class="page-footer">Sent every Sunday &mdash; your personal Denver events agent.</p>
 
 </div>
+
+<!-- Sticky feedback bar (hidden until votes are cast) -->
+<div id="feedback-bar">
+  <span id="fb-summary"></span>
+  <button id="fb-send">&#128140; Send Feedback</button>
+  <button id="fb-clear">Clear</button>
+</div>
+
+<script>
+(function () {
+  var KEY = 'denver_events_prefs';
+
+  function getPrefs() {
+    try { return JSON.parse(localStorage.getItem(KEY)) || {}; }
+    catch (e) { return {}; }
+  }
+
+  function savePrefs(prefs) {
+    localStorage.setItem(KEY, JSON.stringify(prefs));
+  }
+
+  function applyVote(tile, action) {
+    var name = tile.dataset.eventName;
+    var prefs = getPrefs();
+    if (prefs[name] === action) {
+      delete prefs[name]; // toggle off
+    } else {
+      prefs[name] = action;
+    }
+    savePrefs(prefs);
+    refreshAll();
+  }
+
+  function refreshAll() {
+    var prefs = getPrefs();
+    document.querySelectorAll('.tile[data-event-name]').forEach(function (tile) {
+      var name = tile.dataset.eventName;
+      var pref = prefs[name];
+      var likeBtn = tile.querySelector('.btn-like');
+      var skipBtn = tile.querySelector('.btn-skip');
+      likeBtn.classList.toggle('active-like', pref === 'liked');
+      skipBtn.classList.toggle('active-skip', pref === 'skipped');
+      tile.classList.toggle('voted-liked', pref === 'liked');
+      tile.classList.toggle('voted-skipped', pref === 'skipped');
+    });
+
+    var entries = Object.entries(prefs);
+    var liked = entries.filter(function (e) { return e[1] === 'liked'; });
+    var skipped = entries.filter(function (e) { return e[1] === 'skipped'; });
+    var bar = document.getElementById('feedback-bar');
+    var total = liked.length + skipped.length;
+    bar.style.display = total > 0 ? 'flex' : 'none';
+
+    var parts = [];
+    if (liked.length) parts.push(liked.length + ' liked');
+    if (skipped.length) parts.push(skipped.length + ' skipped');
+    document.getElementById('fb-summary').textContent = parts.join(' · ');
+  }
+
+  function sendFeedback() {
+    var prefs = getPrefs();
+    var lines = [];
+    Object.entries(prefs).forEach(function (e) {
+      lines.push((e[1] === 'liked' ? 'LIKED: ' : 'SKIP: ') + e[0]);
+    });
+    var subject = encodeURIComponent('Denver Events Feedback');
+    var body = encodeURIComponent(lines.join('\n'));
+    window.location.href = 'mailto:lukebodendorfer@gmail.com?subject=' + subject + '&body=' + body;
+  }
+
+  function clearAll() {
+    localStorage.removeItem(KEY);
+    refreshAll();
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.vote-btn').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var tile = btn.closest('[data-event-name]');
+        var action = btn.classList.contains('btn-like') ? 'liked' : 'skipped';
+        applyVote(tile, action);
+      });
+    });
+    document.getElementById('fb-send').addEventListener('click', sendFeedback);
+    document.getElementById('fb-clear').addEventListener('click', clearAll);
+    refreshAll();
+  });
+})();
+</script>
+
 </body>
 </html>
